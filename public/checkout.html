@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Payment</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Please wait... Redirecting to Stripe for payment</h1>
+  </div>
+
+  <script>
+    fetch('/api/create-checkout-session', {
+      method: 'POST'
+    })
+    .then(res => res.json())
+    .then(data => {
+      const stripe = Stripe('pk_test_51S8luM0JtLU2fuXGR1j27z0bnNJlkVrsAJX62KcUOc9FdXVwiGPvwYUMCN4MTTPQAtZYsYyFhiUmxTsdmuZU1ePp00QieHhAhW'); // Replace with your real key!
+      return stripe.redirectToCheckout({ sessionId: data.id });
+    })
+    .catch(err => {
+      document.body.innerHTML = '<h2>An error occurred while creating the payment session.</h2>';
+      console.error(err);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+{
+  "skinType": "Dry",
+  "markers": [
+    "sensitivity"
+  ],
+  "answers": [
+    {
+      "question": "How old are you?",
+      "answer": "45–64"
+    },
+    {
+      "question": "What is your gender?",
+      "answer": "Male"
+    },
+    {
+      "question": "How does your skin look in the morning after washing?",
+      "answer": "Dry and tight"
+    },
+    {
+      "question": "How does your skin react to cold or wind?",
+      "answer": "Dries out, turns red"
+    },
+    {
+      "question": "Do you notice breakouts or blackheads?",
+      "answer": "Never"
+    },
+    {
+      "question": "How does your skin look throughout the day without makeup?",
+      "answer": "Dull, flaky"
+    },
+    {
+      "question": "What result do you expect most from a cream?",
+      "answer": "Oil control"
+    },
+    {
+      "question": "Do you notice wrinkles?",
+      "answer": "No, almost none"
+    },
+    {
+      "question": "Do you experience redness after washing?",
+      "answer": "Often"
+    },
+    {
+      "question": "Do you have freckles or pigmentation spots?",
+      "answer": "No"
+    },
+    {
+      "question": "How quickly do scratches or pimples heal?",
+      "answer": "Very quickly"
+    },
+    {
+      "question": "How often do you use SPF?",
+      "answer": "Never"
+    },
+    {
+      "question": "Do you feel tightness after a shower?",
+      "answer": "No"
+    },
+    {
+      "question": "Does oily shine appear within 2–3 hours?",
+      "answer": "Yes"
+    },
+    {
+      "question": "How often do you use makeup?",
+      "answer": "Rarely"
+    },
+    {
+      "question": "Do you experience flaking?",
+      "answer": "Yes"
+    },
+    {
+      "question": "Do you have enlarged pores?",
+      "answer": "Yes"
+    },
+    {
+      "question": "How does your skin react to new cosmetics?",
+      "answer": "Often irritation"
+    },
+    {
+      "question": "Do you often get pimples?",
+      "answer": "No"
+    },
+    {
+      "question": "Do you have visible capillaries (couperose)?",
+      "answer": "Yes"
+    },
+    {
+      "question": "Do you consider your skin sensitive?",
+      "answer": "Yes"
+    },
+    {
+      "question": "How often do you feel the need to apply cream?",
+      "answer": "Daily"
+    }
+  ]
+}

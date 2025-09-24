@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Test Results</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Thank you for your payment!</h1>
+    <h2>Your result:</h2>
+    <div id="result-container">
+      <p>Loading result...</p>
+    </div>
+  </div>
+
+  <script>
+    fetch('/results.json')
+      .then(res => res.json())
+      .then(data => {
+        const { skinType, markers, answers } = data;
+        const resultContainer = document.getElementById("result-container");
+
+        let recommendations = {
+          "Dry": `
+            <h3>🌵 You have <strong>dry skin</strong></h3>
+            <p>Dry skin often feels tight, flaky, and sensitive.</p>
+            <strong>Recommended:</strong>
+            <ul>
+              <li>Moisturizing creams with hyaluronic acid</li>
+              <li>Oils: shea butter, jojoba, avocado</li>
+              <li>Hypoallergenic products without alcohol</li>
+            </ul>
+            <strong>Avoid:</strong>
+            <ul>
+              <li>Hot water</li>
+              <li>Alcohol-based toners</li>
+            </ul>
+          `,
+          "Oily": `
+            <h3>🛢️ You have <strong>oily skin</strong></h3>
+            <p>Oily skin is prone to shine, acne, and enlarged pores.</p>
+            <strong>Recommended:</strong>
+            <ul>
+              <li>Gels and lotions with salicylic acid</li>
+              <li>Non-comedogenic products</li>
+              <li>Light textures (gel-cream)</li>
+            </ul>
+          `,
+          "Combination": `
+            <h3>🔄 You have <strong>combination skin</strong></h3>
+            <p>Oily T-zone and dry cheeks.</p>
+            <strong>Recommended:</strong>
+            <ul>
+              <li>Balancing skincare</li>
+              <li>SPF protection, especially in the T-zone</li>
+              <li>Creams with vitamin C</li>
+            </ul>
+          `,
+          "Normal": `
+            <h3>🌿 You have <strong>normal skin</strong></h3>
+            <p>Balanced, not oily or dry.</p>
+            <strong>Recommended:</strong>
+            <ul>
+              <li>Basic lightweight skincare</li>
+              <li>Anti-aging prevention</li>
+              <li>Moisturizers and SPF</li>
+            </ul>
+          `
+        };
+
+        let markerText = "";
+        if (markers.includes("sensitivity")) markerText += "<p>⚠️ Sensitive skin — avoid fragrances, acids, use hypoallergenic products.</p>";
+        if (markers.includes("pigmentation")) markerText += "<p>☀️ Pigmentation — always use SPF 30+ and vitamin C.</p>";
+        if (markers.includes("wrinkles")) markerText += "<p>🧬 Early wrinkles — try products with peptides or retinol (evening use).</p>";
+        if (markers.includes("acne")) markerText += "<p>💥 Prone to breakouts — use non-comedogenic creams with AHA or BHA acids.</p>";
+
+        let generalTips = `
+          <h3>🧴 General skincare tips</h3>
+          <ul>
+            <li>SPF (min. 30) daily — protects from photoaging and pigmentation.</li>
+            <li>Antioxidants (vit. C, E, green tea) — help prevent aging.</li>
+            <li>Retinoids (retinol, retinal) — use only at night, introduce gradually.</li>
+            <li>Serum + cream — more effective than cream alone.</li>
+          </ul>
+        `;
+
+        resultContainer.innerHTML = `
+          ${recommendations[skinType] || ""}
+          ${markerText}
+          ${generalTips}
+        `;
+      })
+      .catch(() => {
+        document.getElementById("result-container").innerHTML = "<p>Failed to load results.</p>";
+      });
+  </script>
+</body>
+</html>
