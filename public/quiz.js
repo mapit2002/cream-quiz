@@ -78,7 +78,7 @@ async function saveResults() {
   const skinType = Object.keys(skinTypeVotes).find(type => skinTypeVotes[type] === maxVotes);
 
   const selectedMarkers = Object.entries(markers)
-    .filter(([_, value]) => value > 0)
+    .filter(([key, value]) => value > 0)
     .map(([key]) => key);
 
   const resultsSummary = {
@@ -88,12 +88,14 @@ async function saveResults() {
   };
 
   try {
+    // 🔹 Відправка результатів на сервер
     await fetch("/api/save-results", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(resultsSummary)
     });
 
+    // 🔹 Перенаправлення на Stripe Checkout
     const stripeRes = await fetch("/api/create-checkout-session", {
       method: "POST"
     });
@@ -101,9 +103,10 @@ async function saveResults() {
     const stripe = Stripe("pk_test_51S8luM0JtLU2fuXGR1j27z0bnNJlkVrsAJX62KcUOc9FdXVwiGPvwYUMCN4MTTPQAtZYsYyFhiUmxTsdmuZU1ePp00QieHhAhW");
     stripe.redirectToCheckout({ sessionId: id });
   } catch (err) {
-    alert("Error saving your results.");
+    alert("Помилка при збереженні результатів.");
     console.error(err);
   }
 }
+
 
 fetchQuestions();

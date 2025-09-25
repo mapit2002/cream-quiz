@@ -57,7 +57,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: 'http://localhost:4242/success.html',
+      success_url: 'https://cream-quiz-1.onrender.com/success.html?paid=true',
       cancel_url: 'http://localhost:4242/cancel.html'
     });
 

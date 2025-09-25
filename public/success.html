@@ -9,92 +9,99 @@
 <body>
   <div class="container">
     <h1>Thank you for your payment!</h1>
-    <h2>Your result:</h2>
-    <div id="result-container">
-      <p>Loading result...</p>
+    <div id="results">
+      <p>Loading your results...</p>
+    </div>
+    <div id="tips" style="display: none;">
+      <h2>🧴 General Skincare Tips</h2>
+      <ul>
+        <li>SPF 30+ daily to protect from aging and pigmentation.</li>
+        <li>Use antioxidants (vitamin C, E, green tea) to prevent aging.</li>
+        <li>Apply retinoids only at night and introduce gradually.</li>
+        <li>Serum + moisturizer is more effective than cream alone.</li>
+      </ul>
     </div>
   </div>
 
   <script>
-    fetch('/results.json')
-      .then(res => res.json())
-      .then(data => {
-        const { skinType, markers, answers } = data;
-        const resultContainer = document.getElementById("result-container");
+    // Check if URL has ?paid=true
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("paid") === "true") {
+      fetch("/results.json")
+        .then(res => res.json())
+        .then(data => {
+          const { skinType, markers, answers } = data;
 
-        let recommendations = {
-          "Dry": `
-            <h3>🌵 You have <strong>dry skin</strong></h3>
-            <p>Dry skin often feels tight, flaky, and sensitive.</p>
-            <strong>Recommended:</strong>
-            <ul>
-              <li>Moisturizing creams with hyaluronic acid</li>
-              <li>Oils: shea butter, jojoba, avocado</li>
-              <li>Hypoallergenic products without alcohol</li>
-            </ul>
-            <strong>Avoid:</strong>
-            <ul>
-              <li>Hot water</li>
-              <li>Alcohol-based toners</li>
-            </ul>
-          `,
-          "Oily": `
-            <h3>🛢️ You have <strong>oily skin</strong></h3>
-            <p>Oily skin is prone to shine, acne, and enlarged pores.</p>
-            <strong>Recommended:</strong>
-            <ul>
-              <li>Gels and lotions with salicylic acid</li>
-              <li>Non-comedogenic products</li>
-              <li>Light textures (gel-cream)</li>
-            </ul>
-          `,
-          "Combination": `
-            <h3>🔄 You have <strong>combination skin</strong></h3>
-            <p>Oily T-zone and dry cheeks.</p>
-            <strong>Recommended:</strong>
-            <ul>
-              <li>Balancing skincare</li>
-              <li>SPF protection, especially in the T-zone</li>
-              <li>Creams with vitamin C</li>
-            </ul>
-          `,
-          "Normal": `
-            <h3>🌿 You have <strong>normal skin</strong></h3>
-            <p>Balanced, not oily or dry.</p>
-            <strong>Recommended:</strong>
-            <ul>
-              <li>Basic lightweight skincare</li>
-              <li>Anti-aging prevention</li>
-              <li>Moisturizers and SPF</li>
-            </ul>
-          `
-        };
+          let recommendations = {
+            "Dry": `
+              <h3>🌵 You have <strong>dry skin</strong></h3>
+              <p>Your skin needs deep hydration and barrier protection.</p>
+              <strong>Recommended:</strong>
+              <ul>
+                <li>Creams with hyaluronic acid</li>
+                <li>Shea butter, jojoba or avocado oils</li>
+                <li>Hypoallergenic formulas, fragrance-free</li>
+              </ul>
+            `,
+            "Oily": `
+              <h3>🛢️ You have <strong>oily skin</strong></h3>
+              <p>Your skin tends to produce excess sebum, may have acne or enlarged pores.</p>
+              <strong>Recommended:</strong>
+              <ul>
+                <li>Light gel-based moisturizers</li>
+                <li>Products with salicylic acid</li>
+                <li>Non-comedogenic skincare</li>
+              </ul>
+            `,
+            "Combination": `
+              <h3>🔄 You have <strong>combination skin</strong></h3>
+              <p>Oily in the T-zone, dry on the cheeks.</p>
+              <strong>Recommended:</strong>
+              <ul>
+                <li>Balancing formulas</li>
+                <li>SPF protection, especially on the nose and forehead</li>
+                <li>Vitamin C serums</li>
+              </ul>
+            `,
+            "Normal": `
+              <h3>🌿 You have <strong>normal skin</strong></h3>
+              <p>Your skin is well-balanced and requires minimal maintenance.</p>
+              <strong>Recommended:</strong>
+              <ul>
+                <li>Light moisturizers</li>
+                <li>Daily SPF</li>
+                <li>Anti-aging care as needed</li>
+              </ul>
+            `
+          };
 
-        let markerText = "";
-        if (markers.includes("sensitivity")) markerText += "<p>⚠️ Sensitive skin — avoid fragrances, acids, use hypoallergenic products.</p>";
-        if (markers.includes("pigmentation")) markerText += "<p>☀️ Pigmentation — always use SPF 30+ and vitamin C.</p>";
-        if (markers.includes("wrinkles")) markerText += "<p>🧬 Early wrinkles — try products with peptides or retinol (evening use).</p>";
-        if (markers.includes("acne")) markerText += "<p>💥 Prone to breakouts — use non-comedogenic creams with AHA or BHA acids.</p>";
+          const markerAdvice = {
+            sensitivity: "Choose hypoallergenic products without alcohol or fragrance.",
+            pigmentation: "Use SPF and vitamin C to reduce pigmentation and brighten skin tone.",
+            wrinkles: "Introduce retinol or peptides in your nighttime routine.",
+            acne: "Look for non-comedogenic formulas and salicylic acid cleansers."
+          };
 
-        let generalTips = `
-          <h3>🧴 General skincare tips</h3>
-          <ul>
-            <li>SPF (min. 30) daily — protects from photoaging and pigmentation.</li>
-            <li>Antioxidants (vit. C, E, green tea) — help prevent aging.</li>
-            <li>Retinoids (retinol, retinal) — use only at night, introduce gradually.</li>
-            <li>Serum + cream — more effective than cream alone.</li>
-          </ul>
-        `;
+          let resultHtml = recommendations[skinType] || "<p>No skin type detected.</p>";
 
-        resultContainer.innerHTML = `
-          ${recommendations[skinType] || ""}
-          ${markerText}
-          ${generalTips}
-        `;
-      })
-      .catch(() => {
-        document.getElementById("result-container").innerHTML = "<p>Failed to load results.</p>";
-      });
+          if (markers.length > 0) {
+            resultHtml += `<h3>📌 Additional concerns:</h3><ul>`;
+            markers.forEach(marker => {
+              resultHtml += `<li>${markerAdvice[marker]}</li>`;
+            });
+            resultHtml += `</ul>`;
+          }
+
+          document.getElementById("results").innerHTML = resultHtml;
+          document.getElementById("tips").style.display = "block";
+        })
+        .catch(err => {
+          document.getElementById("results").innerHTML = `<p>⚠️ Failed to load results.</p>`;
+          console.error(err);
+        });
+    } else {
+      document.getElementById("results").innerHTML = "<p>Payment not confirmed.</p>";
+    }
   </script>
 </body>
 </html>
