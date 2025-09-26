@@ -1,0 +1,112 @@
+[
+  {
+    "text": "How old are you?",
+    "image": "q0.jpg",
+    "answers": ["15–34", "35–44", "45–64", "65+"]
+  },
+  {
+    "text": "What is your gender?",
+    "image": "q0b.jpg",
+    "answers": ["Female", "Male"]
+  },
+  {
+    "text": "How does your skin look in the morning after washing?",
+    "image": "q1.jpg",
+    "answers": ["Dry and tight", "Oily shine", "Normal", "Shiny T-zone, dry cheeks"]
+  },
+  {
+    "text": "How does your skin react to cold or wind?",
+    "image": "q2.jpg",
+    "answers": ["Dries out, turns red", "Barely reacts", "Slight sensitivity", "Oily T-zone, red cheeks"]
+  },
+  {
+    "text": "Do you notice breakouts or blackheads?",
+    "image": "q3.jpg",
+    "answers": ["Rarely", "Often", "Never", "Only in the T-zone"]
+  },
+  {
+    "text": "How does your skin look throughout the day without makeup?",
+    "image": "q4.jpg",
+    "answers": ["Dull, flaky", "Shiny and oily", "Even-toned", "Shiny T-zone, dry cheeks"]
+  },
+  {
+    "text": "What result do you expect most from a cream?",
+    "image": "q5.jpg",
+    "answers": ["Moisturizing and nourishment", "Oil control", "Anti-aging", "Balancing dry and oily areas"]
+  },
+  {
+    "text": "Do you notice wrinkles?",
+    "image": "q6.jpg",
+    "answers": ["No, almost none", "Yes, fine lines", "Pronounced wrinkles"]
+  },
+  {
+    "text": "Do you experience redness after washing?",
+    "image": "q7.jpg",
+    "answers": ["Often", "Rarely"]
+  },
+  {
+    "text": "Do you have freckles or pigmentation spots?",
+    "image": "q8.jpg",
+    "answers": ["Yes", "No"]
+  },
+  {
+    "text": "How quickly do scratches or pimples heal?",
+    "image": "q9.jpg",
+    "answers": ["Very quickly", "Slowly"]
+  },
+  {
+    "text": "How often do you use SPF?",
+    "image": "q10.jpg",
+    "answers": ["Rarely", "Never", "Regularly"]
+  },
+  {
+    "text": "Do you feel tightness after a shower?",
+    "image": "q11.jpg",
+    "answers": ["Yes", "No"]
+  },
+  {
+    "text": "Does oily shine appear within 2–3 hours?",
+    "image": "q12.jpg",
+    "answers": ["Yes", "No"]
+  },
+  {
+    "text": "How often do you use makeup?",
+    "image": "q13.jpg",
+    "answers": ["Daily", "Rarely"]
+  },
+  {
+    "text": "Do you experience flaking?",
+    "image": "q14.jpg",
+    "answers": ["Yes", "No"]
+  },
+  {
+    "text": "Do you have enlarged pores?",
+    "image": "q15.jpg",
+    "answers": ["Yes", "No"]
+  },
+  {
+    "text": "How does your skin react to new cosmetics?",
+    "image": "q16.jpg",
+    "answers": ["Often irritation", "Normal"]
+  },
+  {
+    "text": "Do you often get pimples?",
+    "image": "q17.jpg",
+    "answers": ["Yes", "No"]
+  },
+  {
+    "text": "Do you have visible capillaries (couperose)?",
+    "image": "q18.jpg",
+    "answers": ["Yes", "No"]
+  },
+  {
+    "text": "Do you consider your skin sensitive?",
+    "image": "q19.jpg",
+    "answers": ["Yes", "No"]
+  },
+  {
+    "text": "How often do you feel the need to apply cream?",
+    "image": "q20.jpg",
+    "answers": ["Daily", "Rarely"]
+  }
+]
