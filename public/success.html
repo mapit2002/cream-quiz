@@ -4,104 +4,87 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Test Results</title>
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f8f5f2;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      margin-top: 60px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #d4a373;
+      text-align: center;
+    }
+    .result-block {
+      background-color: #f1f1f1;
+      border-left: 5px solid #d4a373;
+      margin: 15px 0;
+      padding: 15px;
+      border-radius: 5px;
+    }
+    .error {
+      color: #a00;
+      text-align: center;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <h1>Thank you for your payment!</h1>
     <div id="results">
-      <p>Loading your results...</p>
-    </div>
-    <div id="tips" style="display: none;">
-      <h2>🧴 General Skincare Tips</h2>
-      <ul>
-        <li>SPF 30+ daily to protect from aging and pigmentation.</li>
-        <li>Use antioxidants (vitamin C, E, green tea) to prevent aging.</li>
-        <li>Apply retinoids only at night and introduce gradually.</li>
-        <li>Serum + moisturizer is more effective than cream alone.</li>
-      </ul>
+      <p>Loading your personalized results...</p>
     </div>
   </div>
 
   <script>
-    // Check if URL has ?paid=true
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("paid") === "true") {
-      fetch("/results.json")
-        .then(res => res.json())
-        .then(data => {
-          const { skinType, markers, answers } = data;
+    fetch("/server/results.json")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch results.json");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        const resultsContainer = document.getElementById("results");
+        resultsContainer.innerHTML = ""; // clear "loading..." text
 
-          let recommendations = {
-            "Dry": `
-              <h3>🌵 You have <strong>dry skin</strong></h3>
-              <p>Your skin needs deep hydration and barrier protection.</p>
-              <strong>Recommended:</strong>
-              <ul>
-                <li>Creams with hyaluronic acid</li>
-                <li>Shea butter, jojoba or avocado oils</li>
-                <li>Hypoallergenic formulas, fragrance-free</li>
-              </ul>
-            `,
-            "Oily": `
-              <h3>🛢️ You have <strong>oily skin</strong></h3>
-              <p>Your skin tends to produce excess sebum, may have acne or enlarged pores.</p>
-              <strong>Recommended:</strong>
-              <ul>
-                <li>Light gel-based moisturizers</li>
-                <li>Products with salicylic acid</li>
-                <li>Non-comedogenic skincare</li>
-              </ul>
-            `,
-            "Combination": `
-              <h3>🔄 You have <strong>combination skin</strong></h3>
-              <p>Oily in the T-zone, dry on the cheeks.</p>
-              <strong>Recommended:</strong>
-              <ul>
-                <li>Balancing formulas</li>
-                <li>SPF protection, especially on the nose and forehead</li>
-                <li>Vitamin C serums</li>
-              </ul>
-            `,
-            "Normal": `
-              <h3>🌿 You have <strong>normal skin</strong></h3>
-              <p>Your skin is well-balanced and requires minimal maintenance.</p>
-              <strong>Recommended:</strong>
-              <ul>
-                <li>Light moisturizers</li>
-                <li>Daily SPF</li>
-                <li>Anti-aging care as needed</li>
-              </ul>
-            `
-          };
+        if (!Array.isArray(data) || data.length === 0) {
+          resultsContainer.innerHTML = "<p class='error'>⚠️ Failed to load results.</p>";
+          return;
+        }
 
-          const markerAdvice = {
-            sensitivity: "Choose hypoallergenic products without alcohol or fragrance.",
-            pigmentation: "Use SPF and vitamin C to reduce pigmentation and brighten skin tone.",
-            wrinkles: "Introduce retinol or peptides in your nighttime routine.",
-            acne: "Look for non-comedogenic formulas and salicylic acid cleansers."
-          };
-
-          let resultHtml = recommendations[skinType] || "<p>No skin type detected.</p>";
-
-          if (markers.length > 0) {
-            resultHtml += `<h3>📌 Additional concerns:</h3><ul>`;
-            markers.forEach(marker => {
-              resultHtml += `<li>${markerAdvice[marker]}</li>`;
-            });
-            resultHtml += `</ul>`;
-          }
-
-          document.getElementById("results").innerHTML = resultHtml;
-          document.getElementById("tips").style.display = "block";
-        })
-        .catch(err => {
-          document.getElementById("results").innerHTML = `<p>⚠️ Failed to load results.</p>`;
-          console.error(err);
+        data.forEach((result, index) => {
+          const div = document.createElement("div");
+          div.className = "result-block";
+          div.innerHTML = `
+            <p><strong>#${index + 1}</strong></p>
+            <p><strong>Score:</strong> ${result.score || "N/A"}</p>
+            <p><strong>Skin Type:</strong> ${result.skinType || "Unknown"}</p>
+            <p><strong>Recommendation:</strong> ${result.recommendation || "No data"}</p>
+          `;
+          resultsContainer.appendChild(div);
         });
-    } else {
-      document.getElementById("results").innerHTML = "<p>Payment not confirmed.</p>";
-    }
+      })
+      .catch((err) => {
+        console.error("Error loading results:", err);
+        document.getElementById("results").innerHTML =
+          "<p class='error'>⚠️ Failed to load results.</p>";
+      });
   </script>
 </body>
 </html>

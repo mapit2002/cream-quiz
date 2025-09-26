@@ -75,7 +75,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
           product_data: {
             name: 'Skin Type Report',
           },
-          unit_amount: 500, // $5.00
+          unit_amount: 299, // $2.99
         },
         quantity: 1,
       }],
