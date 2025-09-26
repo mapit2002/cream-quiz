@@ -100,7 +100,7 @@ async function saveResults() {
       method: "POST"
     });
     const { id } = await stripeRes.json();
-    const stripe = Stripe("YOUR_PUBLISHABLE_KEY_HERE");
+    const stripe = Stripe("STRIPE_PUBLISHABLE_KEY");
     stripe.redirectToCheckout({ sessionId: id });
   } catch (err) {
     alert("Помилка при збереженні результатів.");
