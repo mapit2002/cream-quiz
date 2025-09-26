@@ -2,7 +2,8 @@ const express = require('express');
 const fs = require('fs');
 const cors = require('cors');
 const path = require('path');
-const stripe = require('stripe')(STRIPE_SECRET_KEY);
+require('dotenv').config();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
  // 🔑 Replace with your real secret key
 
 const app = express();
@@ -58,7 +59,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
       ],
       mode: 'payment',
       success_url: 'https://cream-quiz-1.onrender.com/success.html?paid=true',
-      cancel_url: 'http://localhost:4242/cancel.html'
+      cancel_url:  'https://cream-quiz-1.onrender.com/cancel.html',
     });
 
     res.json({ id: session.id });
