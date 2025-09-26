@@ -1,74 +1,79 @@
 const express = require('express');
 const fs = require('fs');
-const cors = require('cors');
 const path = require('path');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
- // 🔑 Replace with your real secret key
+const bodyParser = require('body-parser');
+const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
-const PORT = 4242;
+const PORT = process.env.PORT || 4242;
 
-// ✅ Middleware
+// Middleware
 app.use(cors());
-app.use(express.json());
-
-// ✅ Static files
 app.use(express.static('public'));
-app.use('/images', express.static(path.join(__dirname, '../public/images')));
-app.use('/server', express.static(path.join(__dirname))); // to access results.json
+app.use(bodyParser.json());
 
-// ✅ GET /api/questions
-app.get('/api/questions', (req, res) => {
-  try {
-    const questions = JSON.parse(fs.readFileSync(path.join(__dirname, 'questions.json'), 'utf8'));
-    res.json(questions);
-  } catch (error) {
-    console.error('❌ Failed to load questions:', error.message);
-    res.status(500).json({ error: 'Could not load questions' });
-  }
-});
-
-// ✅ POST /api/save-results
-app.post('/api/save-results', (req, res) => {
-  try {
-    fs.writeFileSync(path.join(__dirname, '../public/results.json'), JSON.stringify(req.body, null, 2));
-    res.json({ message: 'Results saved successfully' });
-  } catch (error) {
-    console.error('❌ Failed to save results:', error.message);
-    res.status(500).json({ error: 'Could not save results' });
-  }
-});
-
-// ✅ Stripe Checkout
+// Create Checkout Session
 app.post('/api/create-checkout-session', async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: 'Test Results',
-            },
-            unit_amount: 299,
+      line_items: [{
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: 'Quiz Results',
           },
-          quantity: 1,
+          unit_amount: 299, // in cents
         },
-      ],
+        quantity: 1,
+      }],
       mode: 'payment',
-      success_url: 'https://cream-quiz-1.onrender.com/success.html?paid=true',
-      cancel_url: 'http://localhost:4242/cancel.html'
+      success_url: 'https://cream-quiz-1.onrender.com/success.html',
+      cancel_url: 'https://cream-quiz-1.onrender.com/cancel.html',
     });
 
     res.json({ id: session.id });
   } catch (error) {
-    console.error('Stripe error:', error.message);
-    res.status(500).json({ error: 'Stripe error' });
+    console.error('Error creating checkout session:', error);
+    res.status(500).json({ error: 'Failed to create session' });
   }
 });
 
-// ✅ Start server
+// Save Quiz Results
+app.post('/api/save-results', (req, res) => {
+  const result = req.body;
+
+  if (!result || Object.keys(result).length === 0) {
+    return res.status(400).json({ message: 'Invalid result data' });
+  }
+
+  const filePath = path.join(__dirname, 'results.json');
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    let results = [];
+    if (!err && data) {
+      try {
+        results = JSON.parse(data);
+      } catch (parseErr) {
+        console.error('Error parsing JSON:', parseErr);
+      }
+    }
+
+    results.push(result);
+
+    fs.writeFile(filePath, JSON.stringify(results, null, 2), err => {
+      if (err) {
+        console.error('Error saving results:', err);
+        return res.status(500).json({ message: 'Failed to save results' });
+      }
+
+      res.status(200).json({ message: 'Results saved successfully' });
+    });
+  });
+});
+
+// Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server started at: http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
