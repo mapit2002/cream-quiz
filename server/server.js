@@ -1,49 +1,90 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const cors = require('cors');
 const bodyParser = require('body-parser');
-require('dotenv').config();
-const app = express();
+require('dotenv').config(); // <-- обов'язково на самому початку!
 
-app.use(bodyParser.json());
-app.use(express.static('public'));
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const app = express();
+const PORT = process.env.PORT || 4242;
+
+app.use(cors());
+app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+// 🔹 Перевірка ключа Stripe
+console.log("✅ Stripe ключ прочитаний з .env:", process.env.STRIPE_SECRET_KEY ? 'OK' : '❌ NOT FOUND');
+
+app.get('/api/questions', (req, res) => {
+  const questionsPath = path.join(__dirname, 'questions.json');
+  fs.readFile(questionsPath, 'utf8', (err, data) => {
+    if (err) {
+      console.error('❌ Error reading questions:', err);
+      return res.status(500).json({ error: 'Failed to load questions' });
+    }
+    res.json(JSON.parse(data));
+  });
+});
 
 app.post('/api/save-results', (req, res) => {
-  const filePath = path.join(__dirname, 'results.json');
+  const results = req.body;
+  const resultsPath = path.join(__dirname, 'results.json');
 
-  // Читаємо існуючий файл або створюємо новий
-  fs.readFile(filePath, 'utf8', (err, data) => {
-    let results = [];
-    if (!err && data) {
+  fs.readFile(resultsPath, 'utf8', (err, data) => {
+    let json = [];
+    if (!err) {
       try {
-        const parsed = JSON.parse(data);
-        if (Array.isArray(parsed)) {
-          results = parsed;
-        } else {
-          console.warn("⚠️ Warning: existing results.json is not an array. Overwriting.");
-        }
+        json = JSON.parse(data);
       } catch (e) {
-        console.warn("⚠️ Warning: Failed to parse results.json. Creating a new one.");
+        console.error('❌ Error parsing results file:', e);
       }
     }
+    json.push(results);
 
-    // Додаємо нові результати
-    results.push(req.body);
-
-    // Записуємо назад у файл
-    fs.writeFile(filePath, JSON.stringify(results, null, 2), (writeErr) => {
-      if (writeErr) {
-        console.error("❌ Error saving results:", writeErr);
-        return res.status(500).json({ error: 'Failed to save results.' });
+    fs.writeFile(resultsPath, JSON.stringify(json, null, 2), (err) => {
+      if (err) {
+        console.error('❌ Error saving results:', err);
+        return res.status(500).json({ error: 'Failed to save results' });
       }
-      console.log("✅ Results saved successfully.");
-      res.status(200).json({ message: 'Results saved.' });
+      res.status(200).json({ message: 'Results saved successfully' });
     });
   });
 });
 
-// Start the server
-const PORT = process.env.PORT || 3000;
+// 🔹 Stripe checkout endpoint
+app.post('/api/create-checkout-session', async (req, res) => {
+  console.log("➡️ POST /api/create-checkout-session");
+
+  const YOUR_DOMAIN = 'https://cream-quiz-1.onrender.com';
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [{
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: 'Skin Type Report',
+          },
+          unit_amount: 500, // $5.00
+        },
+        quantity: 1,
+      }],
+      mode: 'payment',
+      success_url: `${YOUR_DOMAIN}/success.html?paid=true`,
+      cancel_url: `${YOUR_DOMAIN}/cancel.html`,
+    });
+
+    console.log("✅ Stripe session created:", session.id);
+    res.json({ id: session.id });
+  } catch (err) {
+    console.error('❌ Error creating checkout session:', err.message);
+    res.status(500).json({ error: 'Failed to create checkout session' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
