@@ -28,27 +28,34 @@ app.get('/api/questions', (req, res) => {
   });
 });
 
-app.post('/api/save-results', (req, res) => {
+app.post("/api/save-results", (req, res) => {
   const results = req.body;
-  const resultsPath = path.join(__dirname, 'results.json');
 
-  fs.readFile(resultsPath, 'utf8', (err, data) => {
-    let json = [];
-    if (!err) {
-      try {
-        json = JSON.parse(data);
-      } catch (e) {
-        console.error('❌ Error parsing results file:', e);
-      }
+  fs.readFile("./server/results.json", "utf8", (err, data) => {
+    if (err) {
+      console.error("Error reading results.json:", err);
+      return res.status(500).json({ message: "Failed to read results file." });
     }
-    json.push(results);
 
-    fs.writeFile(resultsPath, JSON.stringify(json, null, 2), (err) => {
-      if (err) {
-        console.error('❌ Error saving results:', err);
-        return res.status(500).json({ error: 'Failed to save results' });
+    let json = [];
+    try {
+      json = JSON.parse(data);
+      if (!Array.isArray(json)) {
+        json = []; // на випадок, якщо там не масив
       }
-      res.status(200).json({ message: 'Results saved successfully' });
+    } catch (parseErr) {
+      console.error("Error parsing results.json:", parseErr);
+      json = [];
+    }
+
+    json.push(results); // Додаємо новий результат у масив
+
+    fs.writeFile("./server/results.json", JSON.stringify(json, null, 2), (writeErr) => {
+      if (writeErr) {
+        console.error("Error writing to results.json:", writeErr);
+        return res.status(500).json({ message: "Failed to save results." });
+      }
+      res.status(200).json({ message: "Results saved successfully." });
     });
   });
 });
