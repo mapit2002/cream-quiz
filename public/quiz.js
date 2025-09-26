@@ -1,112 +1,66 @@
-let questions = [];
-let currentQuestionIndex = 0;
-let answers = [];
-let skinTypeVotes = {
-  "Dry": 0,
-  "Oily": 0,
-  "Combination": 0,
-  "Normal": 0
-};
-let markers = {
-  sensitivity: 0,
-  pigmentation: 0,
-  wrinkles: 0,
-  acne: 0
-};
-
-const questionImage = document.getElementById("question-image");
-const questionText = document.getElementById("question-text");
-const answersContainer = document.getElementById("answers-container");
-const progress = document.getElementById("progress");
-
-async function fetchQuestions() {
-  try {
-    const res = await fetch("/api/questions");
-    questions = await res.json();
-    showQuestion();
-  } catch (err) {
-    questionText.textContent = "Failed to load questions.";
-    console.error(err);
+const questions = [
+  {
+    text: "How often do you feel the need to apply cream?",
+    options: ["Daily", "Occasionally", "Rarely"],
+  },
+  {
+    text: "How does your skin feel after washing?",
+    options: ["Tight", "Normal", "Oily"],
+  },
+  {
+    text: "Do you have visible pores?",
+    options: ["Yes", "No", "Only in T-zone"],
   }
-}
+];
+
+let currentQuestion = 0;
+let answers = [];
 
 function showQuestion() {
-  const question = questions[currentQuestionIndex];
-  questionText.textContent = question.text;
-  questionImage.src = `images/${question.image}`;
-  answersContainer.innerHTML = "";
-
-  question.answers.forEach((answer, index) => {
-    const btn = document.createElement("button");
-    btn.classList.add("answer-btn");
-    btn.textContent = answer;
-    btn.onclick = () => selectAnswer(index, answer);
-    answersContainer.appendChild(btn);
-  });
-
-  progress.style.width = `${(currentQuestionIndex / questions.length) * 100}%`;
+  const question = questions[currentQuestion];
+  const container = document.getElementById("quiz");
+  container.innerHTML = `
+    <h2>${question.text}</h2>
+    ${question.options.map(option =>
+      `<button onclick="selectAnswer('${option}')">${option}</button>`
+    ).join("")}
+  `;
 }
 
-function selectAnswer(index, answerText) {
-  answers.push({ question: questions[currentQuestionIndex].text, answer: answerText });
+function selectAnswer(answer) {
+  answers.push(answer);
+  currentQuestion++;
 
-  const lowerText = answerText.toLowerCase();
-  const indexToUseForSkin = [2, 3, 4, 5, 10, 12, 14];
-
-  if (indexToUseForSkin.includes(currentQuestionIndex)) {
-    if (lowerText.includes("dry") || lowerText.includes("flaky")) skinTypeVotes["Dry"]++;
-    if (lowerText.includes("oily") || lowerText.includes("shine")) skinTypeVotes["Oily"]++;
-    if (lowerText.includes("t-zone") || (lowerText.includes("oily") && lowerText.includes("dry"))) skinTypeVotes["Combination"]++;
-    if (lowerText.includes("normal")) skinTypeVotes["Normal"]++;
-  }
-
-  if (lowerText.includes("redness") || lowerText.includes("reacts") || lowerText.includes("flaky")) markers.sensitivity++;
-  if (lowerText.includes("pigment") || lowerText.includes("freckles")) markers.pigmentation++;
-  if (lowerText.includes("wrinkles") || lowerText.includes("fine lines")) markers.wrinkles++;
-  if (lowerText.includes("acne") || lowerText.includes("breakouts") || lowerText.includes("pimples")) markers.acne++;
-
-  currentQuestionIndex++;
-  if (currentQuestionIndex < questions.length) {
+  if (currentQuestion < questions.length) {
     showQuestion();
   } else {
-    saveResults();
-  }
-}
-
-async function saveResults() {
-  const maxVotes = Math.max(...Object.values(skinTypeVotes));
-  const skinType = Object.keys(skinTypeVotes).find(type => skinTypeVotes[type] === maxVotes);
-
-  const selectedMarkers = Object.entries(markers)
-    .filter(([key, value]) => value > 0)
-    .map(([key]) => key);
-
-  const resultsSummary = {
-    skinType,
-    markers: selectedMarkers,
-    answers
-  };
-
-  try {
-    // 🔹 Відправка результатів на сервер
-    await fetch("/api/save-results", {
+    // Після завершення тесту — створити Stripe Checkout
+    fetch("/api/save-results", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(resultsSummary)
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ answers })
+    })
+    .then(res => res.json())
+    .then(() => {
+      return fetch("/api/create-checkout-session", {
+        method: "POST"
+      });
+    })
+    .then(res => res.json())
+    .then(session => {
+      if (session.id) {
+        return stripe.redirectToCheckout({ sessionId: session.id });
+      } else {
+        alert("Failed to create checkout session.");
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Something went wrong.");
     });
-
-    // 🔹 Перенаправлення на Stripe Checkout
-    const stripeRes = await fetch("/api/create-checkout-session", {
-      method: "POST"
-    });
-    const { id } = await stripeRes.json();
-    const stripe = Stripe("pk_live_51S8luD1oJTwfIbOhuGRJ0pcDlLcDSkGNqQVa7fZYGxgXW5FyXQ6PjBaP6K1ptbz1QzgVmzoswOSUs4y311bTuQMy00r24wL3wi");
-    stripe.redirectToCheckout({ sessionId: id });
-  } catch (err) {
-    alert("Помилка при збереженні результатів.");
-    console.error(err);
   }
 }
 
-
-fetchQuestions();
+window.onload = showQuestion;

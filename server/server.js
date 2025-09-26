@@ -1,97 +1,90 @@
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-require('dotenv').config(); // <-- обов'язково на самому початку!
+const express = require("express");
+const fs = require("fs");
+const path = require("path");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+require("dotenv").config();
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const app = express();
-const PORT = process.env.PORT || 4242;
+const PORT = process.env.PORT || 10000;
 
-app.use(cors());
+app.use(express.static("public"));
 app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// 🔹 Перевірка ключа Stripe
-console.log("✅ Stripe ключ прочитаний з .env:", process.env.STRIPE_SECRET_KEY ? 'OK' : '❌ NOT FOUND');
-
-app.get('/api/questions', (req, res) => {
-  const questionsPath = path.join(__dirname, 'questions.json');
-  fs.readFile(questionsPath, 'utf8', (err, data) => {
-    if (err) {
-      console.error('❌ Error reading questions:', err);
-      return res.status(500).json({ error: 'Failed to load questions' });
-    }
-    res.json(JSON.parse(data));
-  });
-});
-
-app.post("/api/save-results", (req, res) => {
-  const results = req.body;
-
-  fs.readFile("./server/results.json", "utf8", (err, data) => {
-    if (err) {
-      console.error("Error reading results.json:", err);
-      return res.status(500).json({ message: "Failed to read results file." });
-    }
-
-    let json = [];
-    try {
-      json = JSON.parse(data);
-      if (!Array.isArray(json)) {
-        json = []; // на випадок, якщо там не масив
-      }
-    } catch (parseErr) {
-      console.error("Error parsing results.json:", parseErr);
-      json = [];
-    }
-
-    json.push(results); // Додаємо новий результат у масив
-
-    fs.writeFile("./server/results.json", JSON.stringify(json, null, 2), (writeErr) => {
-      if (writeErr) {
-        console.error("Error writing to results.json:", writeErr);
-        return res.status(500).json({ message: "Failed to save results." });
-      }
-      res.status(200).json({ message: "Results saved successfully." });
-    });
-  });
-});
-
-// 🔹 Stripe checkout endpoint
-app.post('/api/create-checkout-session', async (req, res) => {
-  console.log("➡️ POST /api/create-checkout-session");
-
-  const YOUR_DOMAIN = 'https://cream-quiz-1.onrender.com';
-
+// API: створити Stripe Checkout сесію
+app.post("/api/create-checkout-session", async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
+      payment_method_types: ["card"],
       line_items: [{
         price_data: {
-          currency: 'usd',
+          currency: "usd",
           product_data: {
-            name: 'Skin Type Report',
+            name: "PerfectSkin Test Results",
           },
-          unit_amount: 299, // $2.99
+          unit_amount: 1.99, // $1.99
         },
         quantity: 1,
       }],
-      mode: 'payment',
-      success_url: `${YOUR_DOMAIN}/success.html?paid=true`,
-      cancel_url: `${YOUR_DOMAIN}/cancel.html`,
+      mode: "payment",
+      success_url: `${process.env.DOMAIN}/success.html?paid=true`,
+      cancel_url: `${process.env.DOMAIN}/index.html`,
     });
 
-    console.log("✅ Stripe session created:", session.id);
     res.json({ id: session.id });
   } catch (err) {
-    console.error('❌ Error creating checkout session:', err.message);
-    res.status(500).json({ error: 'Failed to create checkout session' });
+    console.error("Error creating checkout session:", err.message);
+    res.status(500).json({ error: "Failed to create checkout session" });
   }
 });
 
+// API: зберегти результати
+app.post("/api/save-results", (req, res) => {
+  const newResult = {
+    answers: req.body.answers,
+    timestamp: new Date().toISOString(),
+  };
+
+  const filePath = path.join(__dirname, "public", "results.json");
+
+  fs.readFile(filePath, "utf8", (err, data) => {
+    let json = [];
+
+    if (!err && data) {
+      try {
+        json = JSON.parse(data);
+        if (!Array.isArray(json)) json = [];
+      } catch {
+        json = [];
+      }
+    }
+
+    json.push(newResult);
+
+    fs.writeFile(filePath, JSON.stringify(json, null, 2), (err) => {
+      if (err) {
+        console.error("Error saving results:", err.message);
+        return res.status(500).json({ message: "Error saving results" });
+      }
+      res.json({ message: "Results saved successfully" });
+    });
+  });
+});
+
+// API: отримати результати
+app.get("/api/results", (req, res) => {
+  const filePath = path.join(__dirname, "public", "results.json");
+  fs.readFile(filePath, "utf8", (err, data) => {
+    if (err) return res.status(500).json({ error: "Failed to load results" });
+
+    try {
+      const json = JSON.parse(data);
+      res.json(json);
+    } catch {
+      res.status(500).json({ error: "Invalid results data" });
+    }
+  });
+});
+
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
