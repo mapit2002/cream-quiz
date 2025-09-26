@@ -100,7 +100,7 @@ async function saveResults() {
       method: "POST"
     });
     const { id } = await stripeRes.json();
-    const stripe = Stripe("YOUR_PUBLISHABLE_KEY_HERE");
+    const stripe = Stripe("pk_live_51S8luD1oJTwfIbOhuGRJ0pcDlLcDSkGNqQVa7fZYGxgXW5FyXQ6PjBaP6K1ptbz1QzgVmzoswOSUs4y311bTuQMy00r24wL3wi");
     stripe.redirectToCheckout({ sessionId: id });
   } catch (err) {
     alert("Помилка при збереженні результатів.");
