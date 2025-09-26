@@ -100,7 +100,7 @@ async function saveResults() {
       method: "POST"
     });
     const { id } = await stripeRes.json();
-    const stripe = Stripe("pk_test_51S8luM0JtLU2fuXGR1j27z0bnNJlkVrsAJX62KcUOc9FdXVwiGPvwYUMCN4MTTPQAtZYsYyFhiUmxTsdmuZU1ePp00QieHhAhW");
+    const stripe = Stripe("YOUR_PUBLISHABLE_KEY_HERE");
     stripe.redirectToCheckout({ sessionId: id });
   } catch (err) {
     alert("Помилка при збереженні результатів.");
