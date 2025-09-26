@@ -1,1 +1,96 @@
-[]
+{
+  "skinType": "Normal",
+  "markers": [
+    "wrinkles"
+  ],
+  "answers": [
+    {
+      "question": "How old are you?",
+      "answer": "45–64"
+    },
+    {
+      "question": "What is your gender?",
+      "answer": "Male"
+    },
+    {
+      "question": "How does your skin look in the morning after washing?",
+      "answer": "Normal"
+    },
+    {
+      "question": "How does your skin react to cold or wind?",
+      "answer": "Mild sensitivity"
+    },
+    {
+      "question": "Do you notice breakouts or blackheads?",
+      "answer": "Never"
+    },
+    {
+      "question": "How does your skin look throughout the day without makeup?",
+      "answer": "Even"
+    },
+    {
+      "question": "What result do you expect most from a cream?",
+      "answer": "Anti-aging"
+    },
+    {
+      "question": "Do you notice wrinkles?",
+      "answer": "Yes, fine lines"
+    },
+    {
+      "question": "Do you experience redness after washing?",
+      "answer": "Rarely"
+    },
+    {
+      "question": "Do you have freckles or pigmentation spots?",
+      "answer": "Yes"
+    },
+    {
+      "question": "How quickly do scratches/pimples heal?",
+      "answer": "Slowly"
+    },
+    {
+      "question": "How often do you use SPF?",
+      "answer": "Never"
+    },
+    {
+      "question": "Do you feel tightness after a shower?",
+      "answer": "No"
+    },
+    {
+      "question": "Does your skin become shiny within 2–3 hours?",
+      "answer": "Yes"
+    },
+    {
+      "question": "How often do you wear makeup?",
+      "answer": "Daily"
+    },
+    {
+      "question": "Do you experience flaking?",
+      "answer": "No"
+    },
+    {
+      "question": "Do you have enlarged pores?",
+      "answer": "No"
+    },
+    {
+      "question": "How does your skin react to new cosmetics?",
+      "answer": "Normal"
+    },
+    {
+      "question": "Do pimples appear often?",
+      "answer": "No"
+    },
+    {
+      "question": "Do you have visible capillaries (couperose)?",
+      "answer": "No"
+    },
+    {
+      "question": "Do you consider your skin sensitive?",
+      "answer": "Yes"
+    },
+    {
+      "question": "How often do you feel the need to use cream?",
+      "answer": "Rarely"
+    }
+  ]
+}
