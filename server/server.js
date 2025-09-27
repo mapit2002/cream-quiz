@@ -6,7 +6,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
  // 🔑 Replace with your real secret key
 
 const app = express();
-const PORT = 4242;
+const PORT = process.env.PORT || 10000;
 
 // ✅ Middleware
 app.use(cors());
