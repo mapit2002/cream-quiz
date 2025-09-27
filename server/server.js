@@ -1,90 +1,74 @@
-const express = require("express");
-const fs = require("fs");
-const path = require("path");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-require("dotenv").config();
+const express = require('express');
+const fs = require('fs');
+const cors = require('cors');
+const path = require('path');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+ // 🔑 Replace with your real secret key
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = 4242;
 
-app.use(express.static("public"));
+// ✅ Middleware
+app.use(cors());
 app.use(express.json());
 
-// API: створити Stripe Checkout сесію
-app.post("/api/create-checkout-session", async (req, res) => {
-  try {
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [{
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: "PerfectSkin Test Results",
-          },
-          unit_amount: 1.99, // $1.99
-        },
-        quantity: 1,
-      }],
-      mode: "payment",
-      success_url: `${process.env.DOMAIN}/success.html?paid=true`,
-      cancel_url: `${process.env.DOMAIN}/index.html`,
-    });
+// ✅ Static files
+app.use(express.static('public'));
+app.use('/images', express.static(path.join(__dirname, '../public/images')));
+app.use('/server', express.static(path.join(__dirname))); // to access results.json
 
-    res.json({ id: session.id });
-  } catch (err) {
-    console.error("Error creating checkout session:", err.message);
-    res.status(500).json({ error: "Failed to create checkout session" });
+// ✅ GET /api/questions
+app.get('/api/questions', (req, res) => {
+  try {
+    const questions = JSON.parse(fs.readFileSync(path.join(__dirname, 'questions.json'), 'utf8'));
+    res.json(questions);
+  } catch (error) {
+    console.error('❌ Failed to load questions:', error.message);
+    res.status(500).json({ error: 'Could not load questions' });
   }
 });
 
-// API: зберегти результати
-app.post("/api/save-results", (req, res) => {
-  const newResult = {
-    answers: req.body.answers,
-    timestamp: new Date().toISOString(),
-  };
+// ✅ POST /api/save-results
+app.post('/api/save-results', (req, res) => {
+  try {
+    fs.writeFileSync(path.join(__dirname, '../public/results.json'), JSON.stringify(req.body, null, 2));
+    res.json({ message: 'Results saved successfully' });
+  } catch (error) {
+    console.error('❌ Failed to save results:', error.message);
+    res.status(500).json({ error: 'Could not save results' });
+  }
+});
 
-  const filePath = path.join(__dirname, "public", "results.json");
-
-  fs.readFile(filePath, "utf8", (err, data) => {
-    let json = [];
-
-    if (!err && data) {
-      try {
-        json = JSON.parse(data);
-        if (!Array.isArray(json)) json = [];
-      } catch {
-        json = [];
-      }
-    }
-
-    json.push(newResult);
-
-    fs.writeFile(filePath, JSON.stringify(json, null, 2), (err) => {
-      if (err) {
-        console.error("Error saving results:", err.message);
-        return res.status(500).json({ message: "Error saving results" });
-      }
-      res.json({ message: "Results saved successfully" });
+// ✅ Stripe Checkout
+app.post('/api/create-checkout-session', async (req, res) => {
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: 'Test Results',
+            },
+            unit_amount: 299,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: 'https://cream-quiz-1.onrender.com/success.html?paid=true',
+      cancel_url: 'http://cream-quiz-1.onrender.com/cancel.html'
     });
-  });
+
+    res.json({ id: session.id });
+  } catch (error) {
+    console.error('Stripe error:', error.message);
+    res.status(500).json({ error: 'Stripe error' });
+  }
 });
 
-// API: отримати результати
-app.get("/api/results", (req, res) => {
-  const filePath = path.join(__dirname, "public", "results.json");
-  fs.readFile(filePath, "utf8", (err, data) => {
-    if (err) return res.status(500).json({ error: "Failed to load results" });
-
-    try {
-      const json = JSON.parse(data);
-      res.json(json);
-    } catch {
-      res.status(500).json({ error: "Invalid results data" });
-    }
-  });
-});
-
+// ✅ Start server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server started at: http://localhost:${PORT}`);
 });
