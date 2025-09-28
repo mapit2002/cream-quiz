@@ -51,7 +51,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
             product_data: {
               name: 'Test Results',
             },
-            unit_amount: 299,
+            unit_amount: 199,
           },
           quantity: 1,
         },
