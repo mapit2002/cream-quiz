@@ -6,6 +6,21 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
  // 🔑 Replace with your real secret key
 
 const app = express();
+const path = require('path');
+const favicon = require('serve-favicon');
+
+// Роздаємо статичні файли з /public
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Видаємо favicon з правильними заголовками
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+
+// Додатковий "страхувальний" маршрут (на випадок кеша або порядку middleware)
+app.get('/favicon.ico', (req, res) => {
+  res.setHeader('Cache-Control', 'public, max-age=604800, immutable'); // 7 днів
+  res.sendFile(path.join(__dirname, 'public', 'favicon.ico'));
+});
+
 // Перенаправлення з http → https і з www → без www
 app.use((req, res, next) => {
   // Якщо з'єднання не HTTPS — перенаправляємо
