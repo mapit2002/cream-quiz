@@ -6,6 +6,22 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
  // 🔑 Replace with your real secret key
 
 const app = express();
+// Перенаправлення з http → https і з www → без www
+app.use((req, res, next) => {
+  // Якщо з'єднання не HTTPS — перенаправляємо
+  if (req.headers["x-forwarded-proto"] !== "https") {
+    return res.redirect("https://" + req.headers.host + req.url);
+  }
+
+  // Якщо користувач відкрив www.prfskin.com → перенаправляємо на prfskin.com
+  if (req.headers.host && req.headers.host.startsWith("www.")) {
+    const newHost = req.headers.host.slice(4); // видаляємо "www."
+    return res.redirect("https://" + newHost + req.url);
+  }
+
+  next();
+});
+
 const PORT = process.env.PORT || 10000;
 
 // ✅ Middleware
