@@ -1,7 +1,6 @@
 const express = require('express');
 const fs = require('fs');
 const cors = require('cors');
-const path = require('path');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
  // 🔑 Replace with your real secret key
 
