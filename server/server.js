@@ -1,11 +1,18 @@
-const express = require('express');
-const fs = require('fs');
-const cors = require('cors');
-const path = require('path');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
- // 🔑 Replace with your real secret key
+const express = require("express");
+const path = require("path");
+const favicon = require("serve-favicon");
 
 const app = express();
+
+// Роздаємо статичні файли з папки "public"
+app.use(express.static(path.join(__dirname, "public")));
+
+// Видаємо favicon (щоб працював https://prfskin.com/favicon.ico)
+app.use(favicon(path.join(__dirname, "public", "favicon.ico")));
+const fs = require('fs');
+const cors = require('cors');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+ // 🔑 Replace with your real secret key
 const PORT = process.env.PORT || 10000;
 
 // ✅ Middleware
@@ -51,7 +58,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
             product_data: {
               name: 'Test Results',
             },
-            unit_amount: 299,
+            unit_amount: 199,
           },
           quantity: 1,
         },
