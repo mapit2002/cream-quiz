@@ -1,41 +1,11 @@
 const express = require('express');
 const fs = require('fs');
 const cors = require('cors');
+const path = require('path');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
  // 🔑 Replace with your real secret key
 
 const app = express();
-const path = require('path');
-const favicon = require('serve-favicon');
-
-// Роздаємо статичні файли з /public
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Видаємо favicon з правильними заголовками
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-
-// Додатковий "страхувальний" маршрут (на випадок кеша або порядку middleware)
-app.get('/favicon.ico', (req, res) => {
-  res.setHeader('Cache-Control', 'public, max-age=604800, immutable'); // 7 днів
-  res.sendFile(path.join(__dirname, 'public', 'favicon.ico'));
-});
-
-// Перенаправлення з http → https і з www → без www
-app.use((req, res, next) => {
-  // Якщо з'єднання не HTTPS — перенаправляємо
-  if (req.headers["x-forwarded-proto"] !== "https") {
-    return res.redirect("https://" + req.headers.host + req.url);
-  }
-
-  // Якщо користувач відкрив www.prfskin.com → перенаправляємо на prfskin.com
-  if (req.headers.host && req.headers.host.startsWith("www.")) {
-    const newHost = req.headers.host.slice(4); // видаляємо "www."
-    return res.redirect("https://" + newHost + req.url);
-  }
-
-  next();
-});
-
 const PORT = process.env.PORT || 10000;
 
 // ✅ Middleware
@@ -81,7 +51,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
             product_data: {
               name: 'Test Results',
             },
-            unit_amount: 199,
+            unit_amount: 299,
           },
           quantity: 1,
         },
